@@ -1,12 +1,19 @@
 import React from 'react'
 import './App.css'
 import phaserGame from './PhaserGame'
-import HelloWorldScene from './scenes/HelloWorldScene'
+import HelloWorldScene, { Planet } from './scenes/HelloWorldScene'
 
 const handleClick = () => {
   const scene = phaserGame.scene.keys.helloworld as HelloWorldScene
   // scene.createEmitter()
-  scene.start(8);  
+  const planets: Planet[] = [
+    { id: 'test1' },
+    { id: 'test2' },
+    { id: 'test3' },
+    { id: 'test4' },
+    { id: 'test5' }
+  ]
+  scene.start(planets);  
 }
 
 const planetOpen = (e: any) => {

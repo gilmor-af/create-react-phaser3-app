@@ -1,5 +1,9 @@
 import Phaser from 'phaser'
 
+export interface Planet {
+  id: string;
+}
+
 export default class HelloWorldScene extends Phaser.Scene {
   constructor() {
     super('helloworld')
@@ -19,12 +23,13 @@ export default class HelloWorldScene extends Phaser.Scene {
   xSpacing = 200;
 
   planets: Phaser.Types.Physics.Arcade.ImageWithDynamicBody[] = [];
+  currentPlanet?: Planet;
 
   preload() {
     // this.load.setCORS('anonymous')
     this.load.setBaseURL('https://af-journey-hackathon2022.s3.eu-west-1.amazonaws.com/')
-    this.load.image('logo', 'images/logo.svg')
-    // this.load.image('logo', 'assets/sprites/phaser3-logo.png')
+    this.load.image('logo', 'Assets/spaceship1@4x.png')
+
     this.load.image('red', 'Assets/red.png')
     this.load.image('planet1', 'Assets/star1@4x.png')
     this.load.image('planet2', 'Assets/star2@4x.png')
@@ -44,20 +49,21 @@ export default class HelloWorldScene extends Phaser.Scene {
     { x: 200, y: 200 },
     { x: 350, y: 650 },
     { x: 630, y: 180 },
-    { x: 800, y: 600 },
-    { x: 1150, y: 150 },
-    { x: 1240, y: 660 },
-    { x: 1500, y: 200 },
-    { x: 1620, y: 600 },
+    { x: 790, y: 575 },
+    { x: 1140, y: 150 },
+    { x: 1230, y: 660 },
+    { x: 1490, y: 200 },
+    { x: 1610, y: 600 },
   ]
 
-  start(count: number) {
-    for (let index = 0; index < count; index++) {
+  start(planetsData: Planet[]) {
+    for (let index = 0; index < planetsData.length; index++) {
       const sprite = this.physics.add.image(this.positions[index].x, this.positions[index].y, 'planet' + (index + 1))
         .setInteractive()
         .setDepth(0);
       sprite.on('pointerdown', (pointer: any) => {
         this.logo2 = sprite;
+        this.currentPlanet = planetsData[index];
         this.physics.moveToObject(this.logo, sprite, 300);
       });
       sprite.scale = 0.1;
@@ -80,7 +86,7 @@ export default class HelloWorldScene extends Phaser.Scene {
       blendMode: 'ADD',
     })
 
-    this.logo = this.physics.add.image(400, 100, 'logo').setDepth(0)
+    this.logo = this.physics.add.image(150, 400, 'logo').setDepth(0).setScale(0.1).setRotation(120);
 
     emitter.startFollow(this.logo);
 
@@ -109,7 +115,7 @@ export default class HelloWorldScene extends Phaser.Scene {
         this.logo.body.speed = 0;
         this.logo.body.velocity = new Phaser.Math.Vector2();
 
-        const event = new CustomEvent('planetOpen', { detail: { id: 'gil'}});
+        const event = new CustomEvent('planetOpen', { detail: { ...this.currentPlanet }});
         // Dispatch the event.
         dispatchEvent(event);
       }
