@@ -1,7 +1,22 @@
 import Phaser from 'phaser'
 
-export interface Planet {
+export interface Reflection {
   id: string;
+  reflection_date: string;
+  name: string;
+  created_at: string;
+}
+
+export interface Goal {
+  id: string;
+  parent_id: string | null;
+  name: string;
+  type: string;
+  created_at: string;
+  updated_at?: string;
+  status?: string;
+  completed_at?: string;
+  user_id: string;
 }
 
 export default class HelloWorldScene extends Phaser.Scene {
@@ -22,8 +37,10 @@ export default class HelloWorldScene extends Phaser.Scene {
 
   xSpacing = 200;
 
+  isPlanetOpen = false;
+
   planets: Phaser.Types.Physics.Arcade.ImageWithDynamicBody[] = [];
-  currentPlanet?: Planet;
+  currentPlanet?: Reflection;
 
   preload() {
     // this.load.setCORS('anonymous')
@@ -56,15 +73,18 @@ export default class HelloWorldScene extends Phaser.Scene {
     { x: 1610, y: 600 },
   ]
 
-  start(planetsData: Planet[]) {
+  start(planetsData: Reflection[]) {
     for (let index = 0; index < planetsData.length; index++) {
       const sprite = this.physics.add.image(this.positions[index].x, this.positions[index].y, 'planet' + (index + 1))
         .setInteractive()
         .setDepth(0);
       sprite.on('pointerdown', (pointer: any) => {
+        this.isPlanetOpen = false;
         this.logo2 = sprite;
         this.currentPlanet = planetsData[index];
         this.physics.moveToObject(this.logo, sprite, 300);
+        const angleDeg = Math.atan2(this.logo.y - sprite.y, this.logo.x - sprite.x) * 180 / Math.PI;
+        this.logo.angle = angleDeg - 90 // container should face the center point
       });
       sprite.scale = 0.1;
       this.planets.push(sprite);
@@ -86,7 +106,7 @@ export default class HelloWorldScene extends Phaser.Scene {
       blendMode: 'ADD',
     })
 
-    this.logo = this.physics.add.image(150, 400, 'logo').setDepth(0).setScale(0.1).setRotation(120);
+    this.logo = this.physics.add.image(150, 400, 'logo').setDepth(2).setScale(0.05).setRotation(120);
 
     emitter.startFollow(this.logo);
 
@@ -114,7 +134,7 @@ export default class HelloWorldScene extends Phaser.Scene {
         // this.logo.body.reset(this.logo2.x, this.logo2.y);
         this.logo.body.speed = 0;
         this.logo.body.velocity = new Phaser.Math.Vector2();
-
+        this.isPlanetOpen = true;
         const event = new CustomEvent('planetOpen', { detail: { ...this.currentPlanet }});
         // Dispatch the event.
         dispatchEvent(event);
